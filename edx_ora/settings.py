@@ -13,6 +13,7 @@ PRINT_QUERIES = False
 
 ADMINS = (
 # ('Your Name', 'your_email@example.com'),
+    'gacco tech', 'tech@gacco.org',
 )
 
 MANAGERS = ADMINS
@@ -21,7 +22,7 @@ MANAGERS = ADMINS
 GRADING_QUEUES_TO_PULL_FROM=['open-ended']
 MESSAGE_QUEUES_TO_PULL_FROM=['open-ended-message']
 REQUESTS_TIMEOUT = 60    # seconds
-TIME_BETWEEN_XQUEUE_PULLS = 10 #seconds.  Time between pull_from_xqueue checking to see if new submissions are on queue.
+TIME_BETWEEN_XQUEUE_PULLS = 20 #seconds.  Time between pull_from_xqueue checking to see if new submissions are on queue.
 TIME_BETWEEN_EXPIRED_CHECKS = 30 * 60 #seconds.  Time between check_for_expired checking for expired/to reset submissions.
 GRADER_SETTINGS_DIRECTORY = "grader_settings/" #Directory contains conf files with workflow settings for graders
 MAX_NUMBER_OF_TIMES_TO_RETRY_GRADING=10 #Maximum number of times graders should fail before submission goes back to lms
@@ -37,7 +38,7 @@ MIN_TO_USE_ML = 100 #Minimum number of instructor graded essays needed to use ma
 MAX_TO_USE_ML = 300 #Maximum number of instructor graded essays to use for ml model creation
 ML_MODEL_PATH=os.path.join(REPO_PATH,"ml_models/") # Path to save and retrieve ML models from.
 TIME_BETWEEN_ML_CREATOR_CHECKS= 5 * 60 # seconds.  Time between ML creator checking to see if models need to be made.
-TIME_BETWEEN_ML_GRADER_CHECKS= 10 # seconds.  Time between ML grader checking to see if models need to be made.
+TIME_BETWEEN_ML_GRADER_CHECKS= 20 # seconds.  Time between ML grader checking to see if models need to be made.
 USE_S3_TO_STORE_MODELS= False #Determines whether or not models are placed in Amazon S3
 S3_BUCKETNAME="OpenEnded"
 S3_FILE_TIMEOUT = 10 * 60 # 10 minutes.
@@ -234,9 +235,13 @@ AWS_ACCESS_KEY_ID= ""
 AWS_SECRET_ACCESS_KEY= ""
 
 #Celery settings
-BROKER_URL = 'redis://localhost:6379/6'
-BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/6'
+#BROKER_URL = 'redis://localhost:6379/6'
+#BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+#CELERY_RESULT_BACKEND = 'redis://localhost:6379/6'
+BROKER_URL = 'amqp://celery:celery@internal-g2-rabbitmq-1495176630.ap-northeast-1.elb.amazonaws.com:5672//'
+CELERY_RESULT_BACKEND = 'amqp'
+CELERY_DEFAULT_QUEUE = 'ora_celery'
+CELERY_TIMEZONE = 'Asia/Tokyo'
 
 # Cache settings for ml grading pending counts.  See controller/grader_interface.py
 RECHECK_EMPTY_ML_GRADE_QUEUE_DELAY = 60
