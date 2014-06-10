@@ -9,7 +9,7 @@ from ml_grading import ml_grading_util
 from controller.control_util import SubmissionControl
 
 from controller.capsules import LocationCapsule, CourseCapsule
-from random import randint
+from random import randint, SystemRandom
 
 log = logging.getLogger(__name__)
 
@@ -66,12 +66,14 @@ class StaffLocation(LocationCapsule):
             try:
                 count = self.pending_count()
                 if count != 0:
-                    sub = self.pending()[randint(0, count - 1)]
+                    sr = SystemRandom()
+                    sub = self.pending()[sr.randint(0, count - 1)]
                     sub.state = SubmissionState.being_graded
                     sub.next_grader_type="IN"
                     sub.save()
                     found = True
                     sub_id = sub.id
+                    log.info("### item_to_score sr.randint selected =%s", sub_id)
 
                     return found, sub_id
             except IndexError as e:
@@ -90,7 +92,23 @@ class StaffLocation(LocationCapsule):
             #Order by confidence if we are looking for finished ML submissions
             finished_submission_text=self.graded_submission_text()
             to_be_graded = self.pending().filter(grader__status_code=GraderStatus.success).order_by('grader__confidence')
+            try:
+                count = to_be_graded.count()
+                if count != 0:
+                    sr = SystemRandom()
+                    sub = to_be_graded[sr.randint(0, count - 1)]
+                    sub.state = SubmissionState.being_graded
+                    sub.next_grader_type="IN"
+                    sub.save()
+                    found = True
+                    sub_id = sub.id
+                    log.info("### item_to_rescore sr.randint selected =%s", sub_id)
+
+                    return found, sub_id
+            except IndexError as e:
+                log.error(e)
     
+            """
             for tbg in to_be_graded:
                 if tbg is not None and tbg.student_response not in finished_submission_text:
                     tbg.state = SubmissionState.being_graded
@@ -102,6 +120,7 @@ class StaffLocation(LocationCapsule):
                     return found, sub_id
     
                     #If nothing is found, return false
+            """
         return False, 0
 
     def next_item(self):
